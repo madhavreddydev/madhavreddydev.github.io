@@ -26,6 +26,61 @@
     position:relative;
   }
 
+  /* ---------- Boot screen ---------- */
+  .boot-screen{
+    position: fixed; inset:0;
+    background: #241a33;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    z-index: 2000;
+    transition: opacity .4s ease;
+  }
+  .boot-screen.hidden{ opacity:0; pointer-events:none; }
+  .boot-star{ font-size:34px; color:#e8558a; margin-bottom:18px; }
+  .boot-name{
+    font-family:'Press Start 2P', monospace;
+    font-size: clamp(20px, 4vw, 34px);
+    color: #fdf3e0;
+    letter-spacing:2px;
+    margin-bottom: 16px;
+    text-align:center;
+  }
+  .boot-sub{
+    font-family:'VT323', monospace;
+    font-size: 20px;
+    color: #d9a8c9;
+    margin-bottom: 26px;
+  }
+  .boot-bar-track{
+    width: min(320px, 70vw);
+    height: 14px;
+    border: 2px solid #e8558a;
+    background: rgba(255,255,255,0.05);
+    margin-bottom: 30px;
+  }
+  .boot-bar-fill{
+    height:100%;
+    width:0%;
+    background: #e8558a;
+    animation: bootload 1.6s ease forwards;
+  }
+  @keyframes bootload{ to{ width:100%; } }
+  .boot-btn{
+    font-family:'Press Start 2P', monospace;
+    font-size: 13px;
+    color: #241a33;
+    background: #f7a8c4;
+    border: 2px solid #fdf3e0;
+    padding: 14px 26px;
+    cursor:pointer;
+    opacity:0;
+    animation: bootbtn .3s ease 1.4s forwards;
+  }
+  @keyframes bootbtn{ to{ opacity:1; } }
+  .boot-btn:hover{ background:#fbc4d8; }
+
+  .app-root{ opacity:0; transition: opacity .4s ease; }
+  .app-root.visible{ opacity:1; }
+
   .menubar{
     position:sticky; top:0; z-index:500;
     display:flex; align-items:center; justify-content:space-between;
@@ -46,7 +101,7 @@
   .desktop{
     position:relative;
     min-height: calc(100vh - 46px);
-    padding: 40px 40px 140px;
+    padding: 24px 40px 140px;
   }
   .desktop-label .top{
     font-family:'Press Start 2P', monospace;
@@ -63,8 +118,8 @@
   .icon-grid{
     margin-top: 34px;
     display:grid;
-    grid-template-columns: repeat(2, 96px);
-    gap: 36px 60px;
+    grid-template-columns: repeat(4, 90px);
+    gap: 28px 30px;
     width: max-content;
   }
   .icon{
@@ -118,24 +173,66 @@
     pointer-events:none;
   }
 
+  .overlay-backdrop{ display:none !important; }
+
   .window{
-    position: relative;
-    width: min(720px, 90vw);
-    margin: 30px auto 0;
+    position: fixed;
+    top: 80px; left: 50%;
+    transform: translateX(-50%);
+    width: min(680px, 92vw);
+    max-height: 74vh;
+    overflow-y: auto;
+    margin: 0;
     background: var(--cream);
     border: 3px solid var(--border);
     box-shadow: 6px 8px 0 rgba(0,0,0,0.25);
     display:none;
+    z-index: 950;
   }
   .window.active{ display:block; }
+  .window.minimized{ display:none !important; }
   .titlebar{
+    position: sticky; top:0; z-index:2;
     background: linear-gradient(90deg, var(--pink) 0%, var(--pink-dark) 100%);
     color: var(--cream);
     font-family:'Press Start 2P', monospace;
     font-size: 12px;
     padding: 12px 16px;
     display:flex; align-items:center; justify-content:space-between;
+    cursor: grab;
+    user-select:none;
   }
+  .titlebar:active{ cursor: grabbing; }
+  .titlebar .win-controls{ display:flex; gap:8px; align-items:center; }
+  .titlebar .ctrl-btn{
+    width:14px; height:14px; border-radius:50%;
+    border:none; cursor:pointer;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:9px; line-height:1; color: rgba(0,0,0,0.35);
+    padding:0;
+  }
+  .titlebar .ctrl-min{ background:#ffe08a; }
+  .titlebar .ctrl-close{ background:#ffb3c6; }
+
+  /* ---------- Taskbar for minimized windows ---------- */
+  .mini-taskbar{
+    position: fixed;
+    left: 50%; bottom: 84px;
+    transform: translateX(-50%);
+    display:flex; gap:10px; flex-wrap:wrap;
+    max-width: 92vw;
+    z-index: 760;
+    justify-content:center;
+  }
+  .mini-chip{
+    background: rgba(255,255,255,0.85);
+    border: 2px solid var(--border);
+    padding: 6px 12px;
+    font-size: 16px;
+    cursor:pointer;
+    box-shadow: 2px 3px 0 rgba(0,0,0,.2);
+  }
+  .mini-chip:hover{ background:#fff; }
   .titlebar .dots{ display:flex; gap:8px; }
   .titlebar .dots span{
     width:12px; height:12px; border-radius:50%;
@@ -190,6 +287,7 @@
     padding: 18px;
     font-size: 18px;
     line-height:1.5;
+    white-space: pre-wrap;
   }
   .terminal .prompt{ color: #f6d78a; }
 
@@ -283,13 +381,27 @@
   @media (max-width: 640px){
     .menubar nav{ display:none; }
     .sticky-note{ display:none; }
-    .icon-grid{ grid-template-columns: repeat(2, 80px); gap:24px 30px; }
+    .icon-grid{ grid-template-columns: repeat(3, 78px); gap:18px 16px; margin-top:20px; }
     .mascot{ display:none; }
+    .window{ width: 94vw; max-height: 86vh; }
+    .window-body{ padding: 20px 18px 24px; font-size: 18px; }
+    .toast{ bottom: 100px; width: 88vw; text-align:center; }
+    .dock{ padding: 10px 14px; gap: 10px; }
+    .dock button{ width:38px; height:38px; font-size:17px; }
   }
 </style>
 </head>
 <body>
 
+<div class="boot-screen" id="boot-screen">
+  <div class="boot-star">✦</div>
+  <div class="boot-name">D.MADHAV.REDDY</div>
+  <div class="boot-sub">loading a little magic...</div>
+  <div class="boot-bar-track"><div class="boot-bar-fill"></div></div>
+  <button class="boot-btn" id="enter-desktop-btn">ENTER DESKTOP ↗</button>
+</div>
+
+<div class="app-root" id="app-root">
 <div class="menubar">
   <div class="brand"><span class="star">✦</span> D.MADHAV.REDDY</div>
   <nav><span>FILE</span><span>EDIT</span><span>VIEW</span><span>WINDOW</span></nav>
@@ -328,7 +440,7 @@
     <div class="titlebar">
       <span>PROJECTS / 03</span>
       <div class="dots"><span></span><span></span><span></span></div>
-      <span class="close" onclick="closeWindow('projects')">✕</span>
+      <span class="win-controls"><button class="ctrl-btn ctrl-min" onclick="minimizeWindow('projects')" title="Minimize">_</button><button class="ctrl-btn ctrl-close" onclick="closeWindow('projects')" title="Close">✕</button></span>
     </div>
     <div class="window-body">
       <p class="eyebrow">Cloud infrastructure, shipped</p>
@@ -359,7 +471,7 @@
     <div class="titlebar">
       <span>SKILLS / TOOLBOX</span>
       <div class="dots"><span></span><span></span><span></span></div>
-      <span class="close" onclick="closeWindow('skills')">✕</span>
+      <span class="win-controls"><button class="ctrl-btn ctrl-min" onclick="minimizeWindow('skills')" title="Minimize">_</button><button class="ctrl-btn ctrl-close" onclick="closeWindow('skills')" title="Close">✕</button></span>
     </div>
     <div class="window-body">
       <p class="eyebrow">Cloud systems, automated</p>
@@ -379,6 +491,10 @@
         <div class="label-line"><span>Terraform</span><span>84%</span></div>
         <div class="bar-track"><div class="bar-fill" style="width:84%"></div></div>
       </div>
+      <div class="bar-row">
+        <div class="label-line"><span>Linux + Git</span><span>90%</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:90%"></div></div>
+      </div>
     </div>
   </div>
 
@@ -386,7 +502,7 @@
     <div class="titlebar">
       <span>EXPERIENCE / LOG</span>
       <div class="dots"><span></span><span></span><span></span></div>
-      <span class="close" onclick="closeWindow('experience')">✕</span>
+      <span class="win-controls"><button class="ctrl-btn ctrl-min" onclick="minimizeWindow('experience')" title="Minimize">_</button><button class="ctrl-btn ctrl-close" onclick="closeWindow('experience')" title="Close">✕</button></span>
     </div>
     <div class="window-body">
       <p class="eyebrow">DVR Softek / Bengaluru</p>
@@ -413,7 +529,7 @@
     <div class="titlebar">
       <span>ABOUT / D.MADHAV REDDY</span>
       <div class="dots"><span></span><span></span><span></span></div>
-      <span class="close" onclick="closeWindow('about')">✕</span>
+      <span class="win-controls"><button class="ctrl-btn ctrl-min" onclick="minimizeWindow('about')" title="Minimize">_</button><button class="ctrl-btn ctrl-close" onclick="closeWindow('about')" title="Close">✕</button></span>
     </div>
     <div class="window-body">
       <p class="eyebrow">DevOps &amp; Cloud Engineer</p>
@@ -440,7 +556,7 @@
     <div class="titlebar">
       <span>CLOUDOPS — zsh</span>
       <div class="dots"><span></span><span></span><span></span></div>
-      <span class="close" onclick="closeWindow('cloudops')">✕</span>
+      <span class="win-controls"><button class="ctrl-btn ctrl-min" onclick="minimizeWindow('cloudops')" title="Minimize">_</button><button class="ctrl-btn ctrl-close" onclick="closeWindow('cloudops')" title="Close">✕</button></span>
     </div>
     <div class="window-body">
       <div class="terminal-user">madhav@cloud ➜</div>
@@ -465,7 +581,7 @@ automate, observe, improve</div>
     <div class="titlebar">
       <span>DEVOPS TOOLBOX</span>
       <div class="dots"><span></span><span></span><span></span></div>
-      <span class="close" onclick="closeWindow('toolbox')">✕</span>
+      <span class="win-controls"><button class="ctrl-btn ctrl-min" onclick="minimizeWindow('toolbox')" title="Minimize">_</button><button class="ctrl-btn ctrl-close" onclick="closeWindow('toolbox')" title="Close">✕</button></span>
     </div>
     <div class="window-body">
       <p class="eyebrow">now running: cloud systems</p>
@@ -482,7 +598,7 @@ automate, observe, improve</div>
     <div class="titlebar">
       <span>DEVOPS RUNBOOKS</span>
       <div class="dots"><span></span><span></span><span></span></div>
-      <span class="close" onclick="closeWindow('runbooks')">✕</span>
+      <span class="win-controls"><button class="ctrl-btn ctrl-min" onclick="minimizeWindow('runbooks')" title="Minimize">_</button><button class="ctrl-btn ctrl-close" onclick="closeWindow('runbooks')" title="Close">✕</button></span>
     </div>
     <div class="window-body">
       <p class="eyebrow">Reliable steps, ready when needed</p>
@@ -500,7 +616,7 @@ automate, observe, improve</div>
     <div class="titlebar">
       <span>CONTACT / SAY HELLO</span>
       <div class="dots"><span></span><span></span><span></span></div>
-      <span class="close" onclick="closeWindow('contact')">✕</span>
+      <span class="win-controls"><button class="ctrl-btn ctrl-min" onclick="minimizeWindow('contact')" title="Minimize">_</button><button class="ctrl-btn ctrl-close" onclick="closeWindow('contact')" title="Close">✕</button></span>
     </div>
     <div class="window-body">
       <p class="eyebrow">open invitation</p>
@@ -518,6 +634,7 @@ automate, observe, improve</div>
 
 </div>
 
+<div class="mini-taskbar" id="mini-taskbar"></div>
 <div class="toast" id="toast"></div>
 <div class="mascot">🧑‍🎤</div>
 
@@ -538,20 +655,80 @@ const names = {
   runbooks: 'Runbooks', contact: 'Contact'
 };
 
-function closeAll(){
-  document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
+document.getElementById('enter-desktop-btn').addEventListener('click', function(){
+  document.getElementById('boot-screen').classList.add('hidden');
+  document.getElementById('app-root').classList.add('visible');
+  setTimeout(() => { document.getElementById('boot-screen').style.display = 'none'; }, 450);
+});
+
+let zTop = 950;
+let cascadeCount = 0;
+const minimized = new Set();
+
+function bringToFront(win){
+  zTop += 1;
+  win.style.zIndex = zTop;
 }
 
 function openWindow(id){
-  closeAll();
   const win = document.getElementById('win-' + id);
-  if(win){ win.classList.add('active'); win.scrollIntoView({behavior:'smooth', block:'center'}); }
+  if(!win) return;
+
+  if(win.classList.contains('active') && !win.classList.contains('minimized')){
+    bringToFront(win);
+    return;
+  }
+
+  if(win.classList.contains('minimized')){
+    win.classList.remove('minimized');
+    minimized.delete(id);
+    renderTaskbar();
+    bringToFront(win);
+    showToast(names[id] + ' opened!');
+    return;
+  }
+
+  // fresh open: cascade position so multiple windows don't stack exactly
+  const offset = (cascadeCount % 5) * 26;
+  win.style.top = (80 + offset) + 'px';
+  win.style.left = 'calc(50% + ' + offset + 'px)';
+  cascadeCount++;
+
+  win.classList.add('active');
+  win.scrollTop = 0;
+  bringToFront(win);
   showToast(names[id] + ' opened!');
 }
 
 function closeWindow(id){
   const win = document.getElementById('win-' + id);
-  if(win){ win.classList.remove('active'); }
+  if(win){
+    win.classList.remove('active');
+    win.classList.remove('minimized');
+    minimized.delete(id);
+    renderTaskbar();
+  }
+}
+
+function minimizeWindow(id){
+  const win = document.getElementById('win-' + id);
+  if(win){
+    win.classList.add('minimized');
+    minimized.add(id);
+    renderTaskbar();
+  }
+}
+
+function renderTaskbar(){
+  const bar = document.getElementById('mini-taskbar');
+  bar.innerHTML = '';
+  minimized.forEach(id => {
+    const chip = document.createElement('div');
+    chip.className = 'mini-chip';
+    chip.textContent = names[id];
+    chip.onclick = () => openWindow(id);
+    bar.appendChild(chip);
+  });
 }
 
 function showToast(msg){
@@ -572,7 +749,61 @@ function updateClock(){
 }
 updateClock();
 setInterval(updateClock, 1000*30);
+
+// ---------- Dragging ----------
+(function enableDragging(){
+  let dragTarget = null;
+  let offsetX = 0, offsetY = 0;
+
+  document.querySelectorAll('.window .titlebar').forEach(bar => {
+    bar.addEventListener('mousedown', startDrag);
+    bar.addEventListener('touchstart', startDrag, {passive:false});
+  });
+
+  function startDrag(e){
+    const win = e.currentTarget.closest('.window');
+    if(!win) return;
+    bringToFront(win);
+
+    const point = e.touches ? e.touches[0] : e;
+    const rect = win.getBoundingClientRect();
+    win.style.left = rect.left + 'px';
+    win.style.top = rect.top + 'px';
+    win.style.transform = 'none';
+
+    dragTarget = win;
+    offsetX = point.clientX - rect.left;
+    offsetY = point.clientY - rect.top;
+
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('touchmove', onDrag, {passive:false});
+    document.addEventListener('mouseup', stopDrag);
+    document.addEventListener('touchend', stopDrag);
+    e.preventDefault();
+  }
+
+  function onDrag(e){
+    if(!dragTarget) return;
+    const point = e.touches ? e.touches[0] : e;
+    let newLeft = point.clientX - offsetX;
+    let newTop = point.clientY - offsetY;
+    newTop = Math.max(0, newTop);
+    dragTarget.style.left = newLeft + 'px';
+    dragTarget.style.top = newTop + 'px';
+    e.preventDefault();
+  }
+
+  function stopDrag(){
+    dragTarget = null;
+    document.removeEventListener('mousemove', onDrag);
+    document.removeEventListener('touchmove', onDrag);
+    document.removeEventListener('mouseup', stopDrag);
+    document.removeEventListener('touchend', stopDrag);
+  }
+})();
 </script>
+
+</div>
 
 </body>
 </html>
